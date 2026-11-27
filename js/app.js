@@ -898,6 +898,7 @@
     if (pass && nextCh) acts.append(h('button', { type: 'button', cls: 'btn primary', onclick: () => { dlg.close(); startChapter(nextCh); } }, `Next: ${nextCh.title}`));
     acts.append(h('button', { type: 'button', cls: 'btn ghost', onclick: () => dlg.close() }, 'Close'));
     try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+    acts.querySelector('.primary, .btn')?.focus();
   }
   const READY = [
     ['power', 'I can start the radar, check the heading line and get a usable picture in under 4 minutes.'],
@@ -910,11 +911,12 @@
     ['measure', 'I can fix my position from radar ranges to the coast.'],
     ['collision', 'I keep a visual lookout and use radar as an aid, as COLREGs Rule 5 requires.'],
   ];
-  function readinessHtml() {
+  const COFFEE = '<a class="coffeepill" href="https://buymeacoffee.com/mkvakin" target="_blank" rel="noopener">☕ Useful? Buy me a coffee</a>';
+  // The progress dialog shows the title itself, so it asks for the card without its own heading.
+  function readinessHtml(opts = {}) {
     const horizon = horizonNm(settings.antH, 3).toFixed(1);
     return `<section class="card">
-      <p class="coffeeline">Radar Trainer is free. If it helped you, you can <a href="https://buymeacoffee.com/mkvakin" target="_blank" rel="noopener">buy me a coffee ☕</a>.</p>
-      <h3>Readiness card</h3>
+      ${opts.noHead ? '' : `<div class="titlerow"><h3>Readiness card</h3>${COFFEE}</div>`}
       <ul class="ready">${READY.map(([id, t]) => `<li class="${progress.passed[id] ? 'ok' : ''}"><span class="tick"></span>${t}</li>`).join('')}</ul>
       <p class="sub">With your ${settings.antH} m antenna, a 3 m buoy shows from about ${horizon} nm.</p>
       <h4>First three things on your own boat</h4>
@@ -1097,9 +1099,10 @@
   }
   function openReadiness() {
     const body = $('#debriefBody');
-    body.innerHTML = `<p class="eyebrow">Your progress</p><h2>Readiness card</h2>${readinessHtml()}`;
-    const acts = $('#debriefActions'); acts.replaceChildren(h('button', { type: 'button', cls: 'btn ghost', onclick: () => $('#debrief').close() }, 'Close'));
-    $('#debrief').showModal();
+    body.innerHTML = `<p class="eyebrow">Your progress</p><div class="titlerow"><h2>Readiness card</h2>${COFFEE}</div>${readinessHtml({ noHead: true })}`;
+    const close = h('button', { type: 'button', cls: 'btn ghost', onclick: () => $('#debrief').close() }, 'Close');
+    const acts = $('#debriefActions'); acts.replaceChildren(close);
+    $('#debrief').showModal(); close.focus();
   }
   let drawerOpen = false;
   function closeDrawer() { drawerOpen = false; document.body.classList.remove('drawer'); }

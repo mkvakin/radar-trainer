@@ -1185,6 +1185,7 @@
     // A page load is a visit, not a fresh chapter start: count it as a first visit or a return, plus the radar in use.
     startChapter(ch, { quiet: true });
     track(lastId ? 'visit/return' : 'visit/first', null);
+    if (matchMedia('(max-width: 1023px), (max-height: 520px)').matches) track('visit/small-screen', null);
     track(`set-active/${G.radar.set}`, null);
     fitScope();
     requestAnimationFrame(frame);

@@ -256,9 +256,64 @@
     .corner { font-size: 9.5px; } .corner b { font-size: 12px; }
   }
 .morsepick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;width:100%}.morsepick .btn{display:inline-flex;gap:8px;align-items:center}.morsepick .mono{letter-spacing:.1em}
+
+  /* Phones, upright tablets and very short screens get a "use a bigger screen" card instead of the console. */
+  .bigscreen { display: none; }
+  @media (max-width: 1023px), (max-height: 520px) {
+    html:not(.force-console) body > :not(.bigscreen):not(script) { display: none !important; }
+    html:not(.force-console) .bigscreen { display: flex; }
+  }
+  .bigscreen { position: fixed; inset: 0; z-index: 100; overflow-y: auto; align-items: flex-start; justify-content: center;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    background: radial-gradient(120% 80% at 50% 0%, #15232B 0%, var(--hull) 60%); color: var(--ink); font-family: var(--font-ui); }
+  .bs-card { margin: auto 0; width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+  .bs-scope { width: min(62vw, 220px); aspect-ratio: 1; max-width: 100%; position: relative; border-radius: 50%;
+    background: radial-gradient(circle, #0E1A13 0%, #070C09 70%); box-shadow: 0 0 0 10px var(--bezel), 0 0 0 11px var(--bezel-hi), 0 20px 60px rgba(0,0,0,.55); overflow: hidden; }
+  .bs-scope svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bs-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(255,181,71,0) 0deg, rgba(255,181,71,0) 300deg, rgba(255,181,71,.5) 358deg, rgba(255,181,71,.9) 360deg); animation: bs-spin 4s linear infinite; }
+  @keyframes bs-spin { to { transform: rotate(360deg); } }
+  @media (max-height: 520px) { .bs-scope { width: 110px; } .bs-card { gap: 12px; } }
+  .bs-eyebrow { margin: 0; font: 600 13px/1 var(--font-inst); letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .bs-card h2 { margin: 0; font: 700 clamp(24px, 7vw, 30px)/1.15 var(--font-inst); text-wrap: balance; }
+  .bs-card p { margin: 0; color: var(--dim); font-size: 16px; line-height: 1.55; }
+  .bs-card p b { color: var(--ink); font-weight: 700; }
+  .bs-link { width: 100%; display: flex; gap: 8px; align-items: center; padding: 8px 8px 8px 14px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+  .bs-link code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font: 600 14px/1.3 var(--font-inst); color: var(--screen-ink); user-select: all; }
+  .bs-link .btn { flex: none; }
+  .bs-anyway { background: none; border: 0; color: var(--dim); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px; }
 </style>
 </head>
 <body>
+<div class="bigscreen" role="dialog" aria-labelledby="bsTitle">
+  <div class="bs-card">
+    <div class="bs-scope" aria-hidden="true">
+      <div class="bs-sweep"></div>
+      <svg viewBox="0 0 100 100"><g fill="none" stroke="#FFB547" stroke-opacity=".28" stroke-width=".6"><circle cx="50" cy="50" r="16"/><circle cx="50" cy="50" r="32"/><circle cx="50" cy="50" r="48"/><line x1="50" y1="2" x2="50" y2="98"/><line x1="2" y1="50" x2="98" y2="50"/></g><g fill="#FFC46A"><circle cx="68" cy="30" r="1.8"/><circle cx="31" cy="64" r="1.4"/><circle cx="74" cy="70" r="1.2"/></g><path d="M12 40 Q20 30 30 34 T44 24" fill="none" stroke="#FFB547" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </div>
+    <p class="bs-eyebrow">Radar Trainer</p>
+    <h2 id="bsTitle">This radar needs a bigger screen</h2>
+    <p>The trainer is a full radar console. It puts the radar screen, the control panel and your instructor side by side, and they do not fit on a phone or an upright tablet.</p>
+    <p>Open it on a <b>laptop or desktop computer</b>, or turn your tablet sideways. On a computer, make the browser window wider.</p>
+    <div class="bs-link"><code id="bsUrl">mkvakin.github.io/radar-trainer</code><button type="button" class="btn primary" id="bsCopy">Copy link</button></div>
+    <button type="button" class="bs-anyway" id="bsAnyway">Show me the console anyway</button>
+  </div>
+</div>
+<script>
+(function () {
+  var url = 'https://mkvakin.github.io/radar-trainer/', copy = document.getElementById('bsCopy');
+  copy.onclick = function () {
+    var done = function () { copy.textContent = 'Copied'; setTimeout(function () { copy.textContent = 'Copy link'; }, 2000); };
+    var pick = function () { var r = document.createRange(); r.selectNodeContents(document.getElementById('bsUrl')); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
+    try { navigator.clipboard.writeText(url).then(done, pick); } catch (e) { pick(); }
+  };
+  try { if (sessionStorage.getItem('radar-trainer:force-console')) document.documentElement.classList.add('force-console'); } catch (e) {}
+  document.getElementById('bsAnyway').onclick = function () {
+    document.documentElement.classList.add('force-console');
+    try { sessionStorage.setItem('radar-trainer:force-console', '1'); } catch (e) {}
+    window.dispatchEvent(new Event('resize'));
+  };
+})();
+</script>
 
 <header class="topbar" id="topbar">
   <button type="button" class="btn drawer-btn" id="btnDrawer">Chapters</button>

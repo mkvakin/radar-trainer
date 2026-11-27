@@ -73,7 +73,7 @@ The trainer is plain HTML and JavaScript with no build step:
 
 ## Privacy
 
-The site counts visits with [GoatCounter](https://www.goatcounter.com), which sets no cookies and collects no personal data. Your progress stays in your own browser and is never sent anywhere.
+The site counts visits with [GoatCounter](https://www.goatcounter.com), which sets no cookies and collects no personal data. The game also sends anonymous course events, such as "started chapter 3", "passed the final exam" or "picked the Sentinel DX", so we can see where the course is too hard. Your progress stays in your own browser and is never sent anywhere.
 
 ## License
 

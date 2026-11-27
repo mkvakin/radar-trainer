@@ -368,9 +368,23 @@
 
   // Chapters whose lessons you already finished open on a choice: take the check, or repeat the lessons.
   const morseText = L => (MORSE[L] || '').split('').map(c => (c === '-' ? '—' : '·')).join(' ');
+  // Anonymous course events for GoatCounter on the public site. Where the counter script is absent, as in a local copy, this does nothing.
+  // The counter script loads in parallel with the game, so an event sent at start-up waits up to five seconds for it.
+  function track(what, ch = G.chapter, tries = 0) {
+    try {
+      const path = ch ? `ch${String(ch.n).padStart(2, '0')}-${ch.id}/${what}` : what;
+      const title = `${path} · ${SETS[G.radar.set].name}`;
+      const send = n => {
+        if (window.goatcounter?.count) window.goatcounter.count({ path, title, event: true });
+        else if (n < 10 && document.querySelector('script[data-goatcounter]')) setTimeout(() => send(n + 1), 500);
+      };
+      send(tries);
+    } catch (e) { /* counting never breaks the game */ }
+  }
   function startChapter(ch, opts = {}) {
     G.chapter = ch; G.phase = ch.teach.length ? 'teach' : 'check'; G.idx = 0; G.run = newRun();
     applyChapterSet(ch);
+    if (!opts.quiet) track('start');
     G.load(ch.scene);
     G.steps = stepsFor(G.phase);
     closeLookout();
@@ -406,7 +420,7 @@
   }
   function next() { G.idx++; enterStep(); }
   function phaseEnd() {
-    if (G.phase === 'teach') { progress.taught[G.chapter.id] = true; saveProgress(); lessonsDone(false); }
+    if (G.phase === 'teach') { progress.taught[G.chapter.id] = true; saveProgress(); track('lessons-done'); lessonsDone(false); }
     else finishChapter(!G.run.fail);
   }
   function lessonsDone(returning) {
@@ -425,9 +439,10 @@
     r.set = want; r.power = 'off'; r.marpa = [];
     r.gainAuto = r.seaAuto = !!SETS[want].autoModes;
   }
-  function checkIntro() {
+  function checkIntro(opts = {}) {
     G.phase = 'check'; G.idx = 0; G.run = newRun();
     applyChapterSet(G.chapter);
+    if (!opts.quiet) track('check-start');
     G.load(G.chapter.scene); closeLookout();
     G.steps = stepsFor('check');
     enterStep();
@@ -864,6 +879,7 @@
     let pass = ok && !G.run.fail;
     if (pass && ch.pass) pass = ch.pass(G.run);
     if (pass && !ch.pass && sc.accuracy < 60) pass = false;
+    track(pass ? 'pass' : G.run.fail === 'You stopped the check.' ? 'gave-up' : 'fail');
     G.sim.paused = false;
     if (pass) {
       const prev = progress.passed[ch.id];
@@ -1117,8 +1133,9 @@
       // Chapter 10 makes you try each set; those switches do not change the set you train on elsewhere.
       if (G.chapter?.id !== 'modern') { settings.set = id; saveSettings(); }
       G.setSet(id, { keepPower: true });
+      track(`set-picked/${id}`, null);
       // Chapters with set-specific lessons restart the current part so the steps match the new set.
-      if (G.chapter && setAware(G.chapter)) { if (G.phase === 'check') checkIntro(); else startChapter(G.chapter, { lessons: true }); toast(`Lessons switched to the ${s.name}.`); }
+      if (G.chapter && setAware(G.chapter)) { if (G.phase === 'check') checkIntro({ quiet: true }); else startChapter(G.chapter, { lessons: true, quiet: true }); toast(`Lessons switched to the ${s.name}.`); }
     } }, s.name));
     setInterval(() => { setSel.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.set === G.radar.set ? 'true' : 'false')); document.body.dataset.set = G.radar.set; }, 200);
     $('#btnCatalog').onclick = openCatalog;
@@ -1165,7 +1182,10 @@
     const firstOpen = CHAPTERS.find(c => !progress.passed[c.id] && chapterUnlocked(c)) || CHAPTERS[0];
     const ch = CHAPTERS.find(c => c.id === lastId && chapterUnlocked(c)) || firstOpen;
     fitScope();
-    startChapter(ch);
+    // A page load is a visit, not a fresh chapter start: count it as a first visit or a return, plus the radar in use.
+    startChapter(ch, { quiet: true });
+    track(lastId ? 'visit/return' : 'visit/first', null);
+    track(`set-active/${G.radar.set}`, null);
     fitScope();
     requestAnimationFrame(frame);
   }

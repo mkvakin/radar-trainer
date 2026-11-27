@@ -143,6 +143,11 @@
   .btn:disabled { opacity: 0.55; cursor: default; }
   .btn.primary { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); font-weight: 700; }
   .btn.ghost { background: transparent; }
+  a.btn { text-decoration: none; color: inherit; display: inline-block; }
+  a.btn.coffee { color: var(--dim); border-color: transparent; }
+  a.btn.coffee:hover { color: var(--brass); }
+  .coffeeline { margin: 0 0 10px; font-size: 13px; color: var(--dim); }
+  .coffeeline a { color: var(--brass); }
   .btn.mini { padding: 5px 9px; font-size: 13px; }
   .btn.sq { min-width: 34px; text-align: center; font-family: var(--font-inst); font-weight: 600; }
   .btn[aria-pressed="true"] { background: color-mix(in srgb, var(--brass) 22%, var(--panel-2)); border-color: var(--brass); color: #F6E3BC; }
@@ -257,6 +262,7 @@
     <button type="button" class="btn" id="btnCatalog">Catalog</button>
     <button type="button" class="btn toggle" id="btnSound" aria-pressed="true">Sound</button>
     <button type="button" class="btn" id="btnSettings">Settings</button>
+    <a class="btn ghost coffee" href="https://buymeacoffee.com/mkvakin" target="_blank" rel="noopener" title="Support Radar Trainer">☕ Buy me a coffee</a>
   </div>
 </header>
 <div class="scrim" id="scrim"></div>

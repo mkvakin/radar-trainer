@@ -913,6 +913,7 @@
   function readinessHtml() {
     const horizon = horizonNm(settings.antH, 3).toFixed(1);
     return `<section class="card">
+      <p class="coffeeline">Radar Trainer is free. If it helped you, you can <a href="https://buymeacoffee.com/mkvakin" target="_blank" rel="noopener">buy me a coffee ☕</a>.</p>
       <h3>Readiness card</h3>
       <ul class="ready">${READY.map(([id, t]) => `<li class="${progress.passed[id] ? 'ok' : ''}"><span class="tick"></span>${t}</li>`).join('')}</ul>
       <p class="sub">With your ${settings.antH} m antenna, a 3 m buoy shows from about ${horizon} nm.</p>

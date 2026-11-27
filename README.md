@@ -77,4 +77,4 @@ Radar Trainer is free software under the MIT License. You may use, copy, change 
 
 ## Support
 
-If the trainer helped you, you can support its development with the **Sponsor** button at the top of this page.
+Radar Trainer is free. If it helped you, you can [buy me a coffee](https://buymeacoffee.com/mkvakin). The **Sponsor** button at the top of this page offers the same link.

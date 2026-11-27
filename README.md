@@ -2,6 +2,8 @@
 
 Radar Trainer teaches you to use the radar on a small sailboat. You start with a radar you have never switched on. You finish by crossing shipping lanes at night with nothing but the radar screen to guide you.
 
+**Play it now:** https://mkvakin.github.io/radar-trainer/
+
 The trainer runs in your web browser. It needs no installation, no account and no internet connection beyond loading two fonts.
 
 ## Why a radar is hard to learn
@@ -47,6 +49,8 @@ The trainer scores you on three things: safety, accuracy and fluency. It remembe
 
 ## How to run it
 
+The easiest way is to open https://mkvakin.github.io/radar-trainer/ in your browser. To run it from your own computer instead:
+
 1. Download this repository. Use the green **Code** button, then **Download ZIP**, and unzip the file.
 2. Open `index.html` in a web browser such as Chrome, Firefox, Safari or Edge.
 
@@ -66,6 +70,10 @@ The trainer is plain HTML and JavaScript with no build step:
 - `js/catalog.js` describes each kind of echo.
 - `js/chapters.js` holds the lessons and checks.
 - `js/app.js` runs the tutor, the controls and the scoring.
+
+## License
+
+Radar Trainer is free software under the MIT License. You may use, copy, change and share it. See the `LICENSE` file.
 
 ## Support
 

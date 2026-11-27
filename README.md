@@ -71,6 +71,10 @@ The trainer is plain HTML and JavaScript with no build step:
 - `js/chapters.js` holds the lessons and checks.
 - `js/app.js` runs the tutor, the controls and the scoring.
 
+## Privacy
+
+The site counts visits with [GoatCounter](https://www.goatcounter.com), which sets no cookies and collects no personal data. Your progress stays in your own browser and is never sent anywhere.
+
 ## License
 
 Radar Trainer is free software under the MIT License. You may use, copy, change and share it. See the `LICENSE` file.

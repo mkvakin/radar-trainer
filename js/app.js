@@ -335,8 +335,11 @@
   }
 
   // ------------------------------------------------------------------ chapters list
+  // Missions open together once the final exam is passed; chapters open one after another.
+  const chLabel = ch => (ch.final ? 'Final exam' : ch.mission ? `Mission ${ch.mission}` : 'Chapter ' + ch.n);
   function chapterUnlocked(ch) {
     if (settings.unlockAll || ch.n === 0) return true;
+    if (ch.mission) return !!progress.passed.exam;
     const prev = CHAPTERS.find(c => c.n === ch.n - 1);
     return !!progress.passed[prev.id];
   }
@@ -348,7 +351,7 @@
         const pass = progress.passed[ch.id], open = chapterUnlocked(ch), cur = G.chapter && G.chapter.id === ch.id;
         list.append(h('li', {}, h('button', { type: 'button', cls: 'ch' + (cur ? ' cur' : '') + (pass ? ' done' : '') + (open ? '' : ' locked'),
           onclick: () => { if (!open) { toast('Pass the previous chapter first, or unlock all chapters in Settings.'); return; } startChapter(ch); closeDrawer(); } },
-          h('span', { cls: 'chn' }, ch.final ? '★' : String(ch.n)), h('span', { cls: 'cht' }, ch.title, h('small', {}, pass ? (pass.sets && pass.sets.length && setAware(ch) ? `Passed on ${pass.sets.map(k => SETS[k].name).join(', ')}` : `Passed · safety ${pass.safety} · accuracy ${pass.accuracy}`) : open ? `About ${ch.mins} min` : 'Locked')))));
+          h('span', { cls: 'chn' }, ch.final ? '★' : ch.mission ? 'M' + ch.mission : String(ch.n)), h('span', { cls: 'cht' }, ch.title, h('small', {}, pass ? (pass.sets && pass.sets.length && setAware(ch) ? `Passed on ${pass.sets.map(k => SETS[k].name).join(', ')}` : `Passed · safety ${pass.safety} · accuracy ${pass.accuracy}`) : open ? `About ${ch.mins} min` : 'Locked')))));
       }
       nav.append(h('div', { cls: 'stage' }, h('h4', {}, stage), list));
     }
@@ -407,7 +410,7 @@
     // Tasks that ask you to click an echo start with the plain Inspect cursor.
     if (st.t === 'click' || st.t === 'mission') G.tool = 'inspect';
     if (st.enter) st.enter(G);
-    if (st.look) openLookout(norm360(G.world.own.hdg + (st.look.relBrg || 0)), { labels: st.look.labels });
+    if (st.look) openLookout(norm360(G.world.own.hdg + (st.look.relBrg || 0)), { labels: st.look.labels, rel: st.look.relBrg || 0 });
     if (st.closeLook) closeLookout();
     if (st.t === 'id') setupDrill(st);
     if (st.mark !== undefined || st.t === 'estimate') { const t = G.t(st.target); if (t) G.markers = [{ target: t.id, letter: st.mark === '' ? '' : (st.mark || st.target) }]; }
@@ -449,7 +452,7 @@
   }
   function headHtml(stepLabel) {
     const ch = G.chapter;
-    return `<span class="tchap">${ch.final ? 'Final exam' : 'Chapter ' + ch.n} · ${ch.title}</span><span class="tphase ${G.phase}">${stepLabel}</span>`;
+    return `<span class="tchap">${chLabel(ch)} · ${ch.title}</span><span class="tphase ${G.phase}">${stepLabel}</span>`;
   }
   function renderTutor() {
     const st = curStep(), steps = curSteps();
@@ -565,10 +568,12 @@
           if (g.pick) {
             // Each choice shows its Morse pattern, so you match the dashes on the screen without leaving the page.
             const row = h('div', { cls: 'morsepick' });
-            const btns = g.pick.options.map(L => h('button', { type: 'button', cls: 'btn mini', onclick: () => {
-              if (L === g.pick.answer) { G.st.goalsDone[i] = true; grade(true); beep(1100, 0.08); btns.forEach(x => { x.disabled = true; }); }
-              else { grade(false, `Wrong racon letter: you picked ${L} (${morseText(L)}). The dashes spelled ${g.pick.answer} (${morseText(g.pick.answer)}).`); feedback('Not that letter. Count the long and short marks behind the buoy and match them to a pattern.', 'bad'); }
-            } }, h('b', {}, L), ' ', h('span', { cls: 'mono' }, morseText(L))));
+            const pk = g.pick;
+            const btns = pk.options.map(L => h('button', { type: 'button', cls: 'btn mini', onclick: () => {
+              if (L === pk.answer) { G.st.goalsDone[i] = true; grade(true); beep(1100, 0.08); btns.forEach(x => { x.disabled = true; }); }
+              else if (pk.morse) { grade(false, `Wrong racon letter: you picked ${L} (${morseText(L)}). The dashes spelled ${pk.answer} (${morseText(pk.answer)}).`); feedback('Not that letter. Count the long and short marks behind the buoy and match them to a pattern.', 'bad'); }
+              else { grade(false, `${pk.what || 'Answer'}: you picked "${L}". The right answer was "${pk.answer}".`); feedback(pk.hint || 'Not that one. Look at the screen again.', 'bad'); }
+            } }, ...(pk.morse ? [h('b', {}, L), ' ', h('span', { cls: 'mono' }, morseText(L))] : [L])));
             row.append(...btns); li.append(row);
           }
           if (g.input) {
@@ -861,6 +866,13 @@
         G.run.penalties.push({ pts: 15, text: `${t.name || 'A vessel'} passed ${Math.round(d * 1852)} m from you. Aim for 0.5 nm (926 m) or more.` });
       }
     }
+    // Mission rules: each one costs points once, the first time its condition holds.
+    for (const rule of st.rules || []) {
+      if (G.mon.pen['rule:' + rule.id] || !rule.when(G)) continue;
+      G.mon.pen['rule:' + rule.id] = true;
+      G.run.penalties.push({ pts: rule.pts || 15, text: rule.text });
+      toast(rule.text);
+    }
     G.mon.landAcc = (G.mon.landAcc || 0) + dt;
     if (G.mon.landAcc > 1) { G.mon.landAcc = 0; G.mon.landMin = Math.min(G.mon.landMin, distToLand(w, o.x, o.y)); }
   }
@@ -903,7 +915,7 @@
     const notes = [...(G.run.fail ? [G.run.fail] : []), ...G.run.penalties.map(p => p.text), ...G.run.notes].slice(0, 8);
     const nextCh = CHAPTERS.find(c => c.n === ch.n + 1);
     body.innerHTML = `
-      <p class="eyebrow">${ch.final ? 'Final exam' : 'Chapter ' + ch.n} · ${ch.title}</p>
+      <p class="eyebrow">${chLabel(ch)} · ${ch.title}</p>
       <h2>${pass ? 'Passed' : 'Not passed yet'}</h2>
       ${ch.id === 'gallery' ? `<p>You named ${G.run.idRight} of ${G.run.idTotal} echoes correctly. The pass mark is 17 of 20.</p>` : ''}
       <div class="scores">${bar('Safety', sc.safety)}${bar('Accuracy', sc.accuracy)}${bar('Fluency', sc.fluency)}</div>
@@ -941,11 +953,18 @@
   }
 
   // ------------------------------------------------------------------ lookout
+  // A lookout opened with opts.rel stays fixed to the boat: it looks that many degrees off the bow and turns when the boat turns.
+  // A reveal (no rel) stays on a fixed true bearing.
+  function lookCenter() { const L = G.look; return L.opts.rel != null ? norm360(G.world.own.hdg + L.opts.rel) : L.center; }
+  function drawLook() {
+    const L = G.look, center = lookCenter(), b = String(Math.round(center) % 360).padStart(3, '0');
+    $('#lookCap').textContent = L.opts.forceDay ? `Reveal · daylight view towards ${b}°T` : `Lookout towards ${b}°T · what you would see from the cockpit`;
+    drawLookout($('#lookCanvas'), G, center, L.opts);
+  }
   function openLookout(center, opts = {}) {
     G.look = { center, opts };
     $('#lookout').hidden = false;
-    $('#lookCap').textContent = opts.forceDay ? `Reveal · daylight view towards ${String(Math.round(center)).padStart(3, '0')}°T` : `Lookout towards ${String(Math.round(center)).padStart(3, '0')}°T · what you would see from the cockpit`;
-    requestAnimationFrame(() => { drawLookout($('#lookCanvas'), G, center, opts); fitScope(); });
+    requestAnimationFrame(() => { if (!G.look) return; drawLook(); fitScope(); });
   }
   function closeLookout() { G.look = null; $('#lookout').hidden = true; fitScope(); }
 
@@ -1015,7 +1034,9 @@
     const wrap = $('#scopeWrap');
     const avail = wrap.clientWidth - 28;
     const lookH = G.look ? $('#lookout').offsetHeight + 12 : 0;
-    const vh = window.innerHeight - $('#topbar').offsetHeight - $('#tutor').offsetHeight - lookH - 64;
+    // Everything else stacked in the radar column (the tutor, or the controls in the wide layout) takes height from the scope.
+    const others = [...$('#scopeWrap').parentElement.children].filter(el => el.id !== 'scopeWrap' && el.id !== 'lookout' && el.offsetParent).reduce((n, el) => n + el.offsetHeight + 12, 0);
+    const vh = window.innerHeight - $('#topbar').offsetHeight - others - lookH - 52;
     const size = Math.floor(clamp(Math.min(avail, Math.max(vh, 340)), 280, 760));
     G.scope.resize(size, Math.min(window.devicePixelRatio || 1, 2));
     $('#ppiBox').style.width = size + 'px'; $('#ppiBox').style.height = size + 'px';
@@ -1092,7 +1113,7 @@
     slowAcc += dtReal;
     if (slowAcc > 0.1) { slowAcc = 0; for (const f of updaters) f(); refreshCorners(); }
     plotAcc += dtReal; if (plotAcc > 0.5) { plotAcc = 0; drawPlotter(); }
-    if (G.look) { lookAcc += dtReal; if (lookAcc > 0.25) { lookAcc = 0; drawLookout($('#lookCanvas'), G, G.look.center, G.look.opts); } }
+    if (G.look) { lookAcc += dtReal; if (lookAcc > 0.25) { lookAcc = 0; drawLook(); } }
     requestAnimationFrame(frame);
   }
 
@@ -1141,7 +1162,7 @@
     $('#btnCatalog').onclick = openCatalog;
     $('#btnSettings').onclick = openSettings;
     $('#btnReady').onclick = openReadiness;
-    $('#btnLook').onclick = () => { const st = G.chapter && curStep(); if (st && st.t === 'id' && !G.st.answered) { toast('The lookout stays closed until you answer.'); return; } G.look ? closeLookout() : openLookout(G.world.own.hdg, {}); };
+    $('#btnLook').onclick = () => { const st = G.chapter && curStep(); if (st && st.t === 'id' && !G.st.answered) { toast('The lookout stays closed until you answer.'); return; } G.look ? closeLookout() : openLookout(G.world.own.hdg, { rel: 0 }); };
     $('#lookClose').onclick = closeLookout;
     $('#btnSound').onclick = () => { settings.sound = !settings.sound; saveSettings(); $('#btnSound').setAttribute('aria-pressed', settings.sound ? 'true' : 'false'); if (settings.sound) beep(880, 0.05); };
     $('#btnSound').setAttribute('aria-pressed', settings.sound ? 'true' : 'false');

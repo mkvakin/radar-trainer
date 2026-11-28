@@ -84,6 +84,41 @@ const SCENES = {
       mkTarget('fishing', 1.8, -5.6, { name: 'Gull' }), mkTarget('fishing', 2.3, -5.9, { name: 'Tern' }), mkTarget('fishing', 1.5, -6.2, { name: 'Skua' }),
       mkTarget('yacht', 1.0, -4.8, { cog: 330, sog: 4, name: 'Shearwater' }), mkTarget('ferry', 9, -7.0, { cog: 280, sog: 17, name: 'Selkie Spirit', route: [[4.5, -6.3], [-8, -5.5]] })] },
     radar: { power: 'off', range: 12, gain: 40, sea: 0, rain: 0, tuneOff: 20, safetyChecked: false, headingError: 0 } }),
+  // ---------- missions: each one is a self-contained scenario on the same chart ----------
+  m_landfall: () => ({ world: { own: { x: 0.6, y: -5.0, hdg: 160, sog: 5, setX: -0.4 }, fogNm: 0.1, wind: { kn: 10, from: 220 },
+    dest: { x: 3.1, y: -9.2, name: 'Port Selkie inner harbour' }, targets: [
+      mkTarget('racon', ...P.selkieApproach, { name: 'Selkie Approach' }),
+      mkTarget('buoy', 3.45, -8.2, { name: 'Selkie port', color: '#C23B2E' }), mkTarget('buoy', 2.75, -8.2, { name: 'Selkie stbd', color: '#2E8B57' }),
+      mkTarget('fishing', 3.1, -9.3, { sog: 4, wander: false, route: [[3.0, -7.6], [1.6, -6.6], [-3, -4]], name: 'Guillemot' })] },
+    radar: TUNED({ range: 3 }) }),
+  m_lanes: () => ({ world: { own: { x: -6, y: 0.5, hdg: 180, sog: 6 }, light: 'night', wind: { kn: 12, from: 230 },
+    dest: { x: -6, y: -5.5, name: 'South of the lanes' }, targets: [
+      mkTarget('ship', -3, -2.7, { cog: 270, sog: 12, name: 'Baltic Trader' }),
+      mkTarget('ship', 1.0, -2.5, { cog: 270, sog: 14, name: 'Nordic Star' }),
+      mkTarget('ship', 9, -2.3, { cog: 270, sog: 15, name: 'Atlantic Rose' }),
+      mkTarget('ship', -17.2, -4.0, { cog: 90, sog: 15, name: 'Cape Ross' }),
+      mkTarget('ship', -24, -3.8, { cog: 90, sog: 13, name: 'Morning Tide' })] },
+    radar: TUNED({ range: 6 }) }),
+  m_squall: () => ({ world: { own: { x: 0, y: 0, hdg: 180, sog: 4 }, wind: { kn: 12, from: 270 },
+    rain: [1.6, 0.6, -0.4, -1.4, -2.4].flatMap(y => [Object.assign({ x: -3, y, r: 0.7, db: 18 }, rainVel(270, 15)), Object.assign({ x: -4.3, y: y + 0.5, r: 0.6, db: 16 }, rainVel(270, 15))]),
+    targets: [mkTarget('yacht', -1.6, -1.07, { cog: 90, sog: 6, name: 'Petrel' }), buoyGannet(), lighthouse()] },
+    radar: TUNED({ range: 6 }) }),
+  m_fleet: () => ({ world: { own: { x: 5.0, y: -2.6, hdg: 90, sog: 5 }, light: 'night', wind: { kn: 10, from: 220 },
+    dest: { x: 11.5, y: -2.6, name: 'East Sound' }, targets: [
+      [7.2, -2.0, false], [7.8, -3.1, true], [8.4, -2.5, false], [9.1, -1.8, true], [9.5, -3.0, false], [10.2, -2.4, true], [8.0, -1.4, true],
+    ].map(([x, y, ais], i) => mkTarget('fishing', x, y, { cog: (i * 67) % 360, sog: 2, ais, name: ['Gull', 'Skua', 'Tern', 'Puffin', 'Eider', 'Shag', 'Gannet'][i] })) },
+    radar: TUNED({ range: 3 }) }),
+  m_anchor: () => ({ world: { own: { x: -3.0, y: 2.4, hdg: 0, sog: 4 }, light: 'night', wind: { kn: 8, from: 220 }, targets: [
+      mkTarget('buoy', -3.75, 3.0, { name: 'Marrow port', color: '#C23B2E' }), mkTarget('buoy', -2.25, 3.0, { name: 'Marrow stbd', color: '#2E8B57' }),
+      ...[[-3.25, 3.6, 1], [-2.95, 3.55, 0], [-2.7, 3.65, 1], [-3.2, 3.95, 0], [-2.75, 4.0, 1], [-3.25, 4.3, 1], [-2.95, 4.35, 0], [-2.7, 4.3, 0]]
+        .map(([x, y, refl], i) => mkTarget(refl ? 'yacht_refl' : 'yacht', x, y, { name: ['Avocet', 'Brent', 'Curlew', 'Dunlin', 'Egret', 'Fulmar', 'Grebe', 'Heron'][i] }))] },
+    radar: TUNED({ range: 0.75 }) }),
+  m_channel: () => ({ world: { own: { x: 3.0, y: -7.2, hdg: 180, sog: 4 }, fogNm: 0.08, wind: { kn: 6, from: 220 },
+    dest: { x: 3.1, y: -9.3, name: 'Port Selkie inner harbour' }, targets: [
+      mkTarget('buoy', 3.45, -8.2, { name: 'Selkie port', color: '#C23B2E' }), mkTarget('buoy', 2.75, -8.2, { name: 'Selkie stbd', color: '#2E8B57' }),
+      mkTarget('ferry', 3.2, -9.7, { cog: 0, sog: 4, route: [[3.15, -8.2], [3.7, -6.8], [6, -5]], name: 'Selkie Spirit' }),
+      mkTarget('kayak', 2.97, -9.4, { cog: 0, sog: 2.5, name: 'Kayak' })] },
+    radar: TUNED({ range: 0.75 }) }),
 };
 
 const stdFail = (G) => G.flags.unsafeTx ? 'You transmitted before confirming the antenna area was clear.' : null;
@@ -349,12 +384,92 @@ const CHAPTERS = [
           { text: 'Confirm the antenna is clear, then transmit', done: G => G.radar.power === 'tx' && G.radar.safetyChecked },
           { text: 'Set gain: turn it up until speckle fills the screen, then back off until the speckle just fades (Auto also counts)', done: G => G.radar.power === 'tx' && inBand(G) },
           { text: 'Peak the tune: turn the Tune knob to where its bar is longest; the peak never fills the gauge (sets without a Tune knob tune themselves)', done: G => G.radar.power === 'tx' && tuneOk(G) },
-          { text: 'Report the Morse letter of the Selkie Approach racon: match the dashes behind its echo to one of these', pick: { options: ['B', 'D', 'G', 'K', 'N', 'M'], answer: 'D' } },
+          { text: 'Report the Morse letter of the Selkie Approach racon: match the dashes behind its echo to one of these', pick: { morse: true, options: ['B', 'D', 'G', 'K', 'N', 'M'], answer: 'D' } },
           { text: 'Keep every vessel more than 0.5 nm away', done: G => dist(G.world.own.x, G.world.own.y, ...P.selkieMouth) < 0.4 },
           { text: 'Arrive at the Port Selkie entrance', done: G => dist(G.world.own.x, G.world.own.y, ...P.selkieMouth) < 0.4 },
         ],
         fail: G => stdFail(G) || nearestVesselFail(0.25, 'The exam fails on any CPA under 0.25 nm.')(G) || (G.mon.landMin < 0.03 ? 'You ran aground.' : null),
         penaltyRange: 0.5, rule19: true },
     ] },
+  // ---------- missions: open once the final exam is passed, in any order ----------
+  { id: 'm_landfall', n: 13, mission: 1, stage: 'Missions', title: 'Fog landfall', mins: 30, scene: 'm_landfall', teach: [],
+    check: [
+      { t: 'mission', text: 'Thick fog, and you can see 200 m at most. Find Port Selkie by radar and enter it between its two entrance buoys, with the red buoy to port. The tide sets you west at 0.4 knots, so watch how the buoys drift on the screen and correct for it. A fishing boat is leaving the harbour. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, autoTime: true, limit: 5400,
+        show: 'helm', hint: 'Steer for the racon first: its line of dashes points straight away from you. Then switch to the 1.5 nm range and steer for the gap between the two small buoy echoes south of it. If both buoys drift right on the screen, the tide is pushing you left: steer a little to port of the gap.',
+        goals: [
+          { text: 'Pass between the Selkie entrance buoys', done: G => G.world.own.y < -8.25 && G.world.own.x > 2.8 && G.world.own.x < 3.4 },
+          { text: 'Reach the inner harbour', done: G => dist(G.world.own.x, G.world.own.y, 3.1, -9.2) < 0.15 },
+        ],
+        fail: G => G.mon.landMin < 0.027 ? 'You ran aground. The shore came within 50 m.' : nearestVesselFail(0.06, 'You hit or nearly hit the fishing boat.')(G), penaltyRange: 0.2, rule19: true },
+    ] },
+
+  { id: 'm_lanes', n: 14, mission: 2, stage: 'Missions', title: 'Cross the shipping lanes', mins: 35, scene: 'm_lanes', teach: [],
+    check: [
+      { t: 'mission', text: 'Night. You must cross two shipping lanes heading south: westbound ships use the northern lane and eastbound ships the southern one. A small yacht must not get in a ship\'s way (Rule 10), so keep clear of every ship. Cross as nearly at right angles as you can, which means holding a heading close to 180°. To let a ship pass, slow down rather than turning along the lane. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, autoTime: true, limit: 6000,
+        show: 'helm', hint: 'Lay the EBL on each ship as it appears. If a ship stays on the EBL while it closes, slow down or stop (Speed −) and let it pass ahead of you. Big ships move at 12 to 15 knots: you have less time than it seems.',
+        goals: [
+          { text: 'Reach the south side of the lanes', done: G => G.world.own.y < -5.5 },
+          { text: 'Keep every ship more than 0.5 nm away', done: G => G.world.own.y < -5.5 },
+        ],
+        rules: [{ id: 'rightangle', pts: 10, when: G => G.world.own.y < -2.0 && G.world.own.y > -4.6 && G.world.own.sog > 0.5 && Math.abs(angDiff(G.world.own.hdg, 180)) > 35,
+          text: 'Rule 10: cross the lanes as nearly at right angles as you can. Slow down to let a ship pass instead of turning along the lane.' }],
+        fail: nearestVesselFail(0.25, 'The mission fails on any CPA under 0.25 nm.'), penaltyRange: 0.5 },
+    ] },
+
+  { id: 'm_squall', n: 15, mission: 3, stage: 'Missions', title: 'Squall line', mins: 30, scene: 'm_squall', teach: [],
+    check: [
+      { t: 'mission', text: 'A line of rain squalls is moving towards you from the west. Work out how long you have before it arrives, then ride it out. Inside the rain the radar shows mostly rain clutter, and a small yacht is sailing somewhere near the squall. Use the <b>Rain</b> control to see through the rain and keep clear of the yacht. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, limit: 2400,
+        show: 'rain', hint: 'Measure the squall\'s range with the VRM, wait a minute or two, and measure again: the difference gives its speed. When the rain reaches you, turn the Rain control up until the rain thins to speckle. A real echo stays put from sweep to sweep while rain shifts.',
+        goals: [
+          { text: 'When you started, how long until the squall would reach you?', pick: { options: ['About 5 minutes', 'About 12 minutes', 'About 25 minutes'], answer: 'About 12 minutes', what: 'Squall timing',
+            hint: 'The squall starts 3 nm to the west and moves at 15 knots. 3 ÷ 15 × 60 = 12 minutes.' } },
+          { text: 'Keep the yacht more than 0.25 nm away', done: G => G.world.t >= 1800 },
+          { text: 'Ride out the squall: 30 minutes of ship\'s time', done: G => G.world.t >= 1800 },
+        ],
+        fail: nearestVesselFail(0.1, 'You never saw the yacht in the rain.'), penaltyRange: 0.25 },
+    ] },
+
+  { id: 'm_fleet', n: 16, mission: 4, stage: 'Missions', title: 'Fishing fleet at night', mins: 40, scene: 'm_fleet', teach: [],
+    check: [
+      { t: 'mission', text: 'Night. A fleet of seven fishing boats is working across your course to East Sound. Fishing boats turn and stop without warning, and three of them carry no AIS. A sailing yacht must keep clear of a vessel engaged in fishing (Rule 18). Pick your way through to the East Sound waypoint and give every boat room. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, autoTime: true, limit: 7200,
+        show: 'helm', hint: 'Turn trails on so you can see which way each boat is heading and when it turns. Look for the widest gap, not the shortest route. The Look out button shows their lights.',
+        goals: [
+          { text: 'Reach the East Sound waypoint', done: G => dist(G.world.own.x, G.world.own.y, 11.5, -2.6) < 0.3 },
+          { text: 'Keep every fishing boat more than 0.3 nm away', done: G => dist(G.world.own.x, G.world.own.y, 11.5, -2.6) < 0.3 },
+        ],
+        fail: nearestVesselFail(0.1, 'You came within 185 m of a fishing boat and its nets.'), penaltyRange: 0.3 },
+    ] },
+
+  { id: 'm_anchor', n: 17, mission: 5, stage: 'Missions', title: 'Crowded anchorage', mins: 25, scene: 'm_anchor', teach: [],
+    check: [
+      { t: 'mission', text: 'Night. Marrow Bay is full of anchored yachts, and some of them carry no radar reflector, so they flicker or vanish. Find a clear spot at least 0.1 nm (185 m) from every yacht and from the shore, and stop there: set <b>Speed</b> to 0 to anchor. Keep to 3 knots or less inside the bay. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, limit: 2400,
+        show: 'range', hint: 'Use the 0.5 or 0.25 nm range and watch for several sweeps: a yacht without a reflector misses some. Set the VRM to 0.1 nm: every echo must stay outside the ring when you stop.',
+        goals: [
+          { text: 'Anchor: stop in Marrow Bay with 0.1 nm of clear water all round', done: G => {
+            const o = G.world.own;
+            if (o.sog > 0 || o.y < 3.35 || o.y > 4.62 || o.x < -3.45 || o.x > -2.55 || distToLand(G.world, o.x, o.y) < 0.05) return false;
+            return G.world.targets.every(t => !/yacht/.test(t.kind) || dist(o.x, o.y, t.x, t.y) >= 0.1);
+          } },
+        ],
+        rules: [{ id: 'bayspeed', pts: 10, when: G => G.world.own.y > 3.35 && G.world.own.sog > 3, text: 'Slow to 3 knots or less inside a crowded anchorage.' }],
+        fail: G => G.mon.landMin < 0.02 ? 'You ran aground.' : nearestVesselFail(0.03, 'You hit an anchored yacht.')(G) },
+    ] },
+
+  { id: 'm_channel', n: 18, mission: 6, stage: 'Missions', title: 'Kayak in the channel', mins: 25, scene: 'm_channel', teach: [],
+    check: [
+      { t: 'mission', text: 'Fog in the Port Selkie channel. The ferry Selkie Spirit is leaving the harbour towards you, and a kayak is paddling somewhere in the channel. Keep to the starboard side of the channel (Rule 9), which is the right-hand side as you head in. Reach the inner harbour without coming close to either. The kayak shows only at short range, and only on some sweeps. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, limit: 2700,
+        show: 'helm', hint: 'Stay on the 0.5 or 0.75 nm range and watch the water ahead for several sweeps. The kayak shows as a faint speck that misses more sweeps than it paints. Slow down early: at 2 knots you have time to react when it appears.',
+        goals: [
+          { text: 'Reach the inner harbour', done: G => dist(G.world.own.x, G.world.own.y, 3.1, -9.3) < 0.12 },
+          { text: 'Keep the kayak more than 0.1 nm away', done: G => dist(G.world.own.x, G.world.own.y, 3.1, -9.3) < 0.12 },
+          { text: 'Keep the ferry more than 0.15 nm away', done: G => dist(G.world.own.x, G.world.own.y, 3.1, -9.3) < 0.12 },
+        ],
+        rules: [
+          { id: 'kayak', pts: 15, when: G => G.tgtGeo('Kayak').r < 0.1, text: 'You passed within 185 m of the kayak.' },
+          { id: 'ferry', pts: 15, when: G => G.tgtGeo('Selkie Spirit').r < 0.15, text: 'The ferry passed within 280 m of you.' },
+          { id: 'stbd', pts: 10, when: G => G.world.own.y < -8.2 && G.world.own.y > -9.5 && G.world.own.x > 3.2, text: 'Rule 9: keep to the starboard side of a narrow channel.' },
+        ],
+        fail: G => G.mon.landMin < 0.02 ? 'You ran aground.' : nearestVesselFail(0.04, 'You hit the kayak or the ferry.')(G) },
+    ] },
 ];
-const STAGES = ['Foundations', 'Reading', 'Using', 'Beyond basics', 'Final'];
+const STAGES = ['Foundations', 'Reading', 'Using', 'Beyond basics', 'Final', 'Missions'];

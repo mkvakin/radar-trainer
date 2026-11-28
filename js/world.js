@@ -27,7 +27,7 @@ const KIND_PHYS = {
   ferry:      { rcs: 2500, h: 20, len: 90,  ais: true },
   yacht_refl: { rcs: 12,   h: 12, len: 12,  ais: false },
   yacht:      { rcs: 1.5,  h: 10, len: 11,  ais: false },
-  kayak:      { rcs: 0.15, h: 0.8, len: 5,  ais: false },
+  kayak:      { rcs: 0.04, h: 0.8, len: 5,  ais: false },
   buoy:       { rcs: 3,    h: 3,  len: 3,   ais: false },
   buoy_refl:  { rcs: 25,   h: 3.5, len: 3,  ais: false },
   racon:      { rcs: 10,   h: 4,  len: 3,   ais: false },

@@ -31,6 +31,17 @@ The course has 12 short chapters, numbered 0 to 11, and a final exam. Each chapt
 
 The final exam is a night passage of 12 nautical miles. The trainer picks a radar at random, and you start with it switched off.
 
+## Missions
+
+Passing the final exam opens six missions. Each one is a single sailing scenario with goals and a scored debrief, and you can play them in any order:
+
+- **Fog landfall.** You find Port Selkie in thick fog and enter between its buoys while the tide pushes you sideways.
+- **Cross the shipping lanes.** You cross two busy lanes at night and let the big ships pass.
+- **Squall line.** You time an approaching line of rain squalls, then find a small yacht hidden inside the rain.
+- **Fishing fleet at night.** You pick a way through seven fishing boats that turn without warning, some with no AIS.
+- **Crowded anchorage.** You find a clear spot among anchored yachts at night and anchor there.
+- **Kayak in the channel.** You keep to your side of a foggy channel while a ferry comes out and a kayak appears late.
+
 ## Three radars
 
 Real boats carry different kinds of radar, and each kind behaves differently. The trainer includes three invented models:

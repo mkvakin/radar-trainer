@@ -617,7 +617,7 @@ const OVL_THEME = {
 };
 const MORSE = { A: '.-', B: '-...', C: '-.-.', D: '-..', G: '--.', K: '-.-', M: '--', N: '-.', O: '---', T: '-', X: '-..-' };
 
-const DROPOUT = { yacht: 0.35, kayak: 0.45, buoy: 0.12, buoy_refl: 0.05, yacht_refl: 0.05, fishing: 0.03 };
+const DROPOUT = { yacht: 0.3, kayak: 0.6, buoy: 0.12, buoy_refl: 0.05, yacht_refl: 0.05, fishing: 0.03 };
 function fluctuation(t, windKn) {
   const sea = clamp(windKn / 12, 0.3, 1.5);
   if (Math.random() < (DROPOUT[t.kind] || 0) * sea) return 0.02;

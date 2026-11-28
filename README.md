@@ -33,7 +33,7 @@ The final exam is a night passage of 12 nautical miles. The trainer picks a rada
 
 ## Missions
 
-Passing the final exam opens six missions. Each one is a single sailing scenario with goals and a scored debrief, and you can play them in any order:
+Six missions are open from the start. Each one is a single sailing scenario with goals and a scored debrief, and you can play them in any order. They work best once you have finished the course:
 
 - **Fog landfall.** You find Port Selkie in thick fog and enter between its buoys while the tide pushes you sideways.
 - **Cross the shipping lanes.** You cross two busy lanes at night and let the big ships pass.

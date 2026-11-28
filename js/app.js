@@ -335,11 +335,10 @@
   }
 
   // ------------------------------------------------------------------ chapters list
-  // Missions open together once the final exam is passed; chapters open one after another.
+  // Missions are always open; chapters open one after another.
   const chLabel = ch => (ch.final ? 'Final exam' : ch.mission ? `Mission ${ch.mission}` : 'Chapter ' + ch.n);
   function chapterUnlocked(ch) {
-    if (settings.unlockAll || ch.n === 0) return true;
-    if (ch.mission) return !!progress.passed.exam;
+    if (settings.unlockAll || ch.n === 0 || ch.mission) return true;
     const prev = CHAPTERS.find(c => c.n === ch.n - 1);
     return !!progress.passed[prev.id];
   }

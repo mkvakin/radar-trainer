@@ -391,7 +391,7 @@ const CHAPTERS = [
         fail: G => stdFail(G) || nearestVesselFail(0.25, 'The exam fails on any CPA under 0.25 nm.')(G) || (G.mon.landMin < 0.03 ? 'You ran aground.' : null),
         penaltyRange: 0.5, rule19: true },
     ] },
-  // ---------- missions: open once the final exam is passed, in any order ----------
+  // ---------- missions: always open, in any order ----------
   { id: 'm_landfall', n: 13, mission: 1, stage: 'Missions', title: 'Fog landfall', mins: 30, scene: 'm_landfall', teach: [],
     check: [
       { t: 'mission', text: 'Thick fog, and you can see 200 m at most. Find Port Selkie by radar and enter it between its two entrance buoys, with the red buoy to port. The tide sets you west at 0.4 knots, so watch how the buoys drift on the screen and correct for it. A fishing boat is leaving the harbour. Steer with the <b>Helm</b> controls at the bottom of the control panel (or the arrow keys): <b>+10</b> and <b>−10</b> turn 10° to starboard or port, and <b>Speed −</b> and <b>+</b> change your speed.', helm: true, autoTime: true, limit: 5400,
